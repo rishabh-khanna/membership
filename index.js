@@ -6,10 +6,11 @@ const cors = require('cors');
 
 const userRoutes = require('./routes/user');
 const contactsRoutes = require('./routes/contacts');
+const productsRoutes = require('./routes/product');
 
 const app = express();
 dotenv.config();
-const port = process.env.PORT;
+const port = 3000;
 
 const corsConfig = {
     origin: `*`,
@@ -32,6 +33,7 @@ app.get("/jsonapi/test", (req, res, next) => {
 
 app.use('/jsonapi/user', userRoutes);
 app.use('/jsonapi/contacts', contactsRoutes);
+app.use('/jsonapi/product', productsRoutes);
 
 
 app.use((err, req, res, next) => {

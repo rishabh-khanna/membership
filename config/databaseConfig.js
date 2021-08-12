@@ -2,9 +2,9 @@
 module.exports = {
     connectionLimit: 10,
     host: 'localhost',
-    user: 'aspireme_db',
-    password: 'fu32iNQfp1g#',
-    database: 'aspireme_db',
+    user: 'root',
+    password: 'root',
+    database: 'aspire',
     multipleStatements: true,
     port     : '3306'
 }
