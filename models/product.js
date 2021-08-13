@@ -1,5 +1,6 @@
 const database = require('../utils/database');
 const dateUtil = require('../utils/date');
+var crypto = require('crypto'); 
 
 exports.getProducts = () => {
     try {
@@ -96,22 +97,35 @@ exports.updateProduct = (body) => {
 }
 exports.assignProduct = (body) => {
     try {
-        console.log(body)
+        //console.log(body.email)
+        const pass="demo123"
         var now = dateUtil.dateNow();
-        console.log(now)
-        const sql = `;`;
-        return database.execute(sql, []).then(data => {
+        var passwordEnc =setPassword("pass");
+        //console.log(now)
+        const sqlUpdate =`insert into users (name,email,password,phone,role_id,created_at) 
+        values(?,?,?,?,?,?);`;
+         return database.execute(sqlUpdate, [body.first_name.concat(body.last_name),body.email,passwordEnc,body.phone,2,now]).then(data => {
+            //return data;
             console.log(data)
-            if(data?.data?.affectedRows>0){
-            return ({ 
-                message : "Product assigned Successfully to user..", 
-            });
-        }else{
-            return ({ 
-                message : "Error while assigning product..", 
-            });
-        }
-            
+            if(data?.data.affectedRows>0){
+                console.log("In")
+                var productId=getProductId("AER");
+                const sql = `insert into user_product_master (user_role_id,user_product_id,is_active) values(?,?,?);`;
+                 return database.execute(sql, [Number(data.data.insertId),Number(productId), 'Y']).then(data => {
+                    console.log(data)
+                    return ({ 
+                        message : "Course alligned to user",
+                        username:  body.email,
+                        password:  pass
+                    })
+                }).catch(err => {
+                    throw err;
+                });
+            }else{
+                return ({ 
+                    message : "User not created Successfully", 
+                })
+            }
         }).catch(err => {
             throw err;
         });
@@ -119,4 +133,31 @@ exports.assignProduct = (body) => {
         console.error(e)
         throw e;
     }
+
 }
+
+var getProductId = function(code)
+{
+    console.log("product id" +code)
+    const sql = `select product_id from product_master where product_code = ?;`;
+        return database.execute(sql, [code]).then(data => {
+            console.log(data);
+            return data.data.product_id;
+        }).catch(err => {
+            throw err;
+        });
+}
+
+var setPassword = function(password) { 
+    //console.log(password)
+   // Creating a unique salt for a particular user 
+   var algo="sha512"
+   var iteration=10000
+   var salt = crypto.randomBytes(16).toString('hex'); 
+   //console.log(salt)
+   // Hashing user's salt and password with 1000 iterations, 
+   var hash = crypto.pbkdf2Sync(password, salt, iteration, 64, algo).toString(`hex`); 
+   var secret=`${iteration}$${salt}$${hash}`
+   console.log(secret)
+   return secret;
+  }; 
