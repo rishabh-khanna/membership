@@ -105,27 +105,38 @@ exports.assignProduct = (body) => {
         const sqlUpdate =`insert into users (name,email,password,phone,role_id,created_at) 
         values(?,?,?,?,?,?);`;
          return database.execute(sqlUpdate, [body.first_name.concat(body.last_name),body.email,passwordEnc,body.phone,2,now]).then(data => {
-            //return data;
+            let todos = [];
             console.log(data)
             if(data?.data.affectedRows>0){
                 console.log("In")
-                var productId=getProductId("AER");
-                const sql = `insert into user_product_master (user_role_id,user_product_id,is_active) values(?,?,?);`;
-                 return database.execute(sql, [Number(data.data.insertId),Number(productId), 'Y']).then(data => {
-                    console.log(data)
-                    return ({ 
-                        message : "Course alligned to user",
-                        username:  body.email,
-                        password:  pass
-                    })
-                }).catch(err => {
-                    throw err;
-                });
-            }else{
-                return ({ 
-                    message : "User not created Successfully", 
-                })
-            }
+               
+                if(body.AER == true)
+                {
+                    console.log("Inside")
+                    var productId=getProductId("AER");
+                    saveUserProductData(data.data.insertId, productId,body,pass);
+                }
+                if(body.APC == true)
+                {
+                    var productId=getProductId("APC");
+                    saveUserProductData(data.data.insertId, productId,body,pass);
+                }
+                if(body.APS == true)
+                {
+                    var productId=getProductId("APS");
+                    saveUserProductData(data.data.insertId, productId,body,pass);
+                }
+                if(body.APH == true)
+                {
+                    var productId=getProductId("APH");
+                    saveUserProductData(data.data.insertId, productId,body,pass);
+                }
+               return ({
+                message: "Course aligned to user",
+                username: body.email,
+                password: pass
+            }) }
+            
         }).catch(err => {
             throw err;
         });
@@ -161,3 +172,14 @@ var setPassword = function(password) {
    console.log(secret)
    return secret;
   }; 
+
+var saveUserProductData=function(inserId,  productId, body, pass) {
+    const sql = `insert into user_product_master (user_role_id,user_product_id,is_active) values(?,?,?);`;
+    return database.execute(sql, [Number(inserId),Number(productId), 'Y']).then(data => {
+       return "Success";
+        console.log(data);
+    }).catch(err => {
+        throw err;
+    });
+}
+
